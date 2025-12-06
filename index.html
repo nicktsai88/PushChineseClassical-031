@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>(推與敲) 第31篇 齊人攫金 - 互動式古文學習 (GitHub版)</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 載入 FontAwesome 圖標 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 載入 Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fdfbf7; /* 米紙色 */
+            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .font-serif {
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        /* 自定義滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d97706; 
+            border-radius: 4px;
+        }
+
+        /* 標籤樣式 */
+        .tab-btn {
+            position: relative;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background-color: #b45309;
+            transition: width 0.3s ease;
+        }
+        .tab-btn.active {
+            color: #92400e;
+            background-color: #fffbeb;
+        }
+        .tab-btn.active::after {
+            width: 100%;
+        }
+
+        /* 互動文字樣式 */
+        .interactive-word {
+            cursor: pointer;
+            border-bottom: 2px dotted #d97706;
+            transition: all 0.2s;
+            padding-bottom: 1px;
+            position: relative;
+            z-index: 20;
+            color: #92400e;
+            font-weight: 500;
+        }
+        .interactive-word:hover {
+            background-color: #fef3c7;
+            color: #b45309;
+            border-bottom-style: solid;
+        }
+
+        /* 彈出註釋 */
+        .note-popup {
+            animation: fadeIn 0.2s ease-out;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px) translateX(-50%); }
+            to { opacity: 1; transform: translateY(0) translateX(-50%); }
+        }
+
+        /* 懸停翻譯效果 */
+        .hover-trans-container:hover .hover-translation {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 故事模式樣式 */
+        .story-choice:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .fade-in-image {
+            animation: fadeInImg 0.8s ease-out forwards;
+        }
+        @keyframes fadeInImg {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 聊天氣泡 */
+        .chat-bubble {
+            max-width: 85%;
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+            line-height: 1.6;
+        }
+        .chat-user {
+            background-color: #dbeafe;
+            color: #1e40af;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+        .chat-ai {
+            background-color: #fff;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+        
+        /* 禁用狀態的樣式 */
+        input[type="radio"]:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .disabled-label {
+            cursor: not-allowed !important;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col">
+
+    <!-- 頂部導航欄 -->
+    <nav class="bg-amber-800 text-amber-50 shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-book-open text-2xl mr-3"></i>
+                    <span class="font-bold text-xl tracking-wider">古文互動教室</span>
+                </div>
+                <div class="hidden md:block text-sm opacity-80">
+                    GitHub Pages 版
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="app" class="max-w-5xl mx-auto p-4 sm:p-6 w-full flex-grow flex flex-col">
+        
+        <!-- 課程標題卡片 -->
+        <header class="bg-white rounded-2xl shadow-md overflow-hidden mb-6 border border-amber-100">
+            <div class="bg-gradient-to-r from-amber-100 to-orange-50 p-6 sm:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 id="main-title" class="text-3xl sm:text-4xl font-serif font-bold text-amber-900 mb-2"></h1>
+                        <div class="flex items-center text-amber-700 space-x-4">
+                            <span class="flex items-center"><i class="fas fa-user-edit mr-2"></i><span id="author-name"></span></span>
+                            <span class="flex items-center"><i class="fas fa-scroll mr-2"></i><span id="source-name"></span></span>
+                        </div>
+                    </div>
+                    <div class="hidden md:block">
+                        <span class="inline-block bg-amber-200 text-amber-900 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wide">國中語文</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 功能標籤 -->
+        <div class="flex flex-wrap justify-center bg-white rounded-xl shadow-sm mb-6 border border-gray-100 sticky top-20 z-40">
+            <button id="tab-overview" class="tab-btn active px-4 py-3 md:px-6 md:py-4 font-medium text-gray-600 hover:text-amber-700" onclick="switchTab('overview')">
+                <i class="fas fa-info-circle mr-2"></i>故事總覽
+            </button>
+            <button id="tab-reading" class="tab-btn px-4 py-3 md:px-6 md:py-4 font-medium text-gray-600 hover:text-amber-700" onclick="switchTab('reading')">
+                <i class="fas fa-glasses mr-2"></i>精讀與圖解
+            </button>
+            <button id="tab-deep" class="tab-btn px-4 py-3 md:px-6 md:py-4 font-medium text-gray-600 hover:text-amber-700" onclick="switchTab('deep')">
+                <i class="fas fa-project-diagram mr-2"></i>深度理解與地圖
+            </button>
+            <button id="tab-story" class="tab-btn px-4 py-3 md:px-6 md:py-4 font-medium text-gray-600 hover:text-amber-700" onclick="switchTab('story')">
+                <i class="fas fa-theater-masks mr-2"></i>抉擇之路(RPG)
+            </button>
+            <button id="tab-vocabulary" class="tab-btn px-4 py-3 md:px-6 md:py-4 font-medium text-gray-600 hover:text-amber-700" onclick="switchTab('vocabulary')">
+                <i class="fas fa-spell-check mr-2"></i>語詞精解
+            </button>
+            <button id="tab-analysis" class="tab-btn px-4 py-3 md:px-6 md:py-4 font-medium text-gray-600 hover:text-amber-700" onclick="switchTab('analysis')">
+                <i class="fas fa-feather-alt mr-2"></i>文義與修辭
+            </button>
+            <button id="tab-chat" class="tab-btn px-4 py-3 md:px-6 md:py-4 font-medium text-gray-600 hover:text-amber-700" onclick="switchTab('chat')">
+                <i class="fas fa-robot mr-2"></i>AI 角色扮演
+            </button>
+            <button id="tab-quiz" class="tab-btn px-4 py-3 md:px-6 md:py-4 font-medium text-gray-600 hover:text-amber-700" onclick="switchTab('quiz')">
+                <i class="fas fa-pen-nib mr-2"></i>隨堂測驗
+            </button>
+        </div>
+
+        <!-- 主要內容區 -->
+        <main id="content-display" class="flex-grow bg-white rounded-2xl shadow-lg p-6 sm:p-8 min-h-[500px] transition-all duration-300 relative">
+            <!-- 內容動態載入 -->
+        </main>
+        <!-- Tooltip container -->
+        <div id="svg-tooltip" class="tooltip"></div>
+
+    </div>
+
+    <!-- 註釋彈出框模板 -->
+    <div id="note-template" class="note-popup absolute bg-white border-l-4 border-amber-500 rounded-r-lg shadow-2xl p-4 z-50 hidden w-64" onclick="event.stopPropagation()">
+        <!-- 關閉按鈕 -->
+        <button onclick="closeNote()" class="absolute top-2 right-2 text-gray-400 hover:text-amber-600 transition">
+            <i class="fas fa-times"></i>
+        </button>
+        <div id="note-content">
+            <!-- 內容動態填充 -->
+        </div>
+    </div>
+
+    <!-- 結果模態框 (Score Modal) -->
+    <div id="score-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl transform transition-all scale-100">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 mb-4">
+                    <i class="fas fa-trophy text-2xl text-amber-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">測驗結果</h3>
+                <p class="text-gray-500 mb-6" id="score-text">你的得分是...</p>
+                <button onclick="closeScoreModal()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-amber-600 text-base font-medium text-white hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 sm:text-sm">
+                    查看詳細解析
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 錯誤提示 -->
+    <div id="error-toast" class="fixed bottom-6 right-6 bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg shadow-xl hidden z-50 flex items-center transition-all transform translate-y-10 opacity-0">
+        <i class="fas fa-exclamation-circle mr-3 text-xl"></i>
+        <div>
+            <p class="font-bold">發生錯誤</p>
+            <p id="error-msg" class="text-sm"></p>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------------------
+        // 1. 教材資料結構 (Content Data) - 齊人攫金
+        // ----------------------------------------------------
+        const contentData = {
+            metadata: {
+                title: "(推與敲) 第31篇 齊人攫金",
+                author: "列子",
+                source: "《列子·說符》"
+            },
+            summary: "齊國有一個渴望得到金子的人。有一天清早，他穿戴好衣帽，來到集市上。走到賣金子的地方，抓了人家的金子就跑。官吏把他抓住了，問他說：「人都在這裡，你為什麼要搶別人的金子呢？」他回答說：「我拿金子的時候，眼裡看不見人，只看見金子。」",
+            
+            meaning: "這則寓言故事深刻地諷刺了「利令智昏」的現象。當一個人的慾望過度膨脹時，他的理智就會被蒙蔽，甚至會忽視顯而易見的現實（如眾目睽睽之下的法律與道德規範），做出極其荒謬愚蠢的行為。故事警示我們應控制貪欲，保持清醒的頭腦。",
+            
+            rhetoric: [
+                "**敘事 (Narrative):** 以簡練的語言敘述了「想金 -> 搶金 -> 被捕 -> 供詞」的完整過程，情節緊湊。",
+                "**對話描寫 (Dialogue):** 透過官吏的質問與齊人的回答，點出故事的核心主旨。",
+                "**誇飾 (Hyperbole):** 「不見人，徒見金」是一種心理上的誇張描寫，極言其專注於財物而無視周遭環境的荒謬心態。",
+                "**映襯 (Foil):** 「衣冠而之市」（外表衣冠楚楚）與「攫其金」（行為如盜賊）形成強烈對比，諷刺了其表裡不一。"
+            ],
+            
+            vocabulary: [
+                { word: "齊人", zhuyin: "ㄑㄧˊ ㄖㄣˊ", pos: "名詞", meaning: "齊國人。" },
+                { word: "欲", zhuyin: "ㄩˋ", pos: "動詞", meaning: "想要、渴望。" },
+                { word: "金", zhuyin: "ㄐㄧㄣ", pos: "名詞", meaning: "金子。" },
+                { word: "清旦", zhuyin: "ㄑㄧㄥ ㄉㄢˋ", pos: "時間詞", meaning: "清晨、大清早。" },
+                { word: "衣冠", zhuyin: "ㄧ ㄍㄨㄢ", pos: "動詞", meaning: "穿上衣服，戴上帽子（指穿戴整齊）。" },
+                { word: "之", zhuyin: "ㄓ", pos: "動詞", meaning: "往、去、到。" },
+                { word: "市", zhuyin: "ㄕˋ", pos: "名詞", meaning: "集市、市場。" },
+                { word: "適", zhuyin: "ㄕˋ", pos: "動詞", meaning: "往、到。" },
+                { word: "鬻", zhuyin: "ㄩˋ", pos: "動詞", meaning: "賣。" },
+                { word: "所", zhuyin: "ㄙㄨㄛˇ", pos: "名詞", meaning: "處所、地方。" },
+                { word: "因", zhuyin: "ㄧㄣ", pos: "連詞", meaning: "於是、就。" },
+                { word: "攫", zhuyin: "ㄐㄩㄝˊ", pos: "動詞", meaning: "奪取、抓取。" },
+                { word: "去", zhuyin: "ㄑㄩˋ", pos: "動詞", meaning: "離開、逃走。" },
+                { word: "吏", zhuyin: "ㄌㄧˋ", pos: "名詞", meaning: "官吏、差役。" },
+                { word: "捕", zhuyin: "ㄅㄨˇ", pos: "動詞", meaning: "捉拿、逮捕。" },
+                { word: "焉", zhuyin: "ㄧㄢ", pos: "代詞/助詞", meaning: "那裡、在（於此）。" },
+                { word: "子", zhuyin: "ㄗˇ", pos: "代詞", meaning: "你（對男子的尊稱，此處帶有質問語氣）。" },
+                { word: "何", zhuyin: "ㄏㄜˊ", pos: "疑問詞", meaning: "為什麼。" },
+                { word: "徒", zhuyin: "ㄊㄨˊ", pos: "副詞", meaning: "只、僅僅。" }
+            ],
+
+            segments: [
+                {
+                    original: "齊人有欲金者，清旦衣冠而之市，適鬻金者之所，因攫其金而去。",
+                    translation: "齊國有一個想要金子的人，清早穿戴整齊前往市集，來到賣金子的地方，就搶了人家的金子離開。",
+                    audioText: "齊人有欲金者，清旦衣冠而之市，適鬻金者之所，因攫其金而去。",
+                    notes: {
+                        "清旦": { zhuyin: "ㄑㄧㄥ ㄉㄢˋ", type: "時間詞", def: "清晨。" },
+                        "衣冠": { zhuyin: "ㄧ ㄍㄨㄢ", type: "動詞", def: "穿戴整齊。" },
+                        "之": { zhuyin: "ㄓ", type: "動詞", def: "往、去。" },
+                        "適": { zhuyin: "ㄕˋ", type: "動詞", def: "到。" },
+                        "鬻": { zhuyin: "ㄩˋ", type: "動詞", def: "賣。" },
+                        "攫": { zhuyin: "ㄐㄩㄝˊ", type: "動詞", def: "搶奪。" }
+                    },
+                    // GitHub Path
+                    imageData: "images/reading_segment_1.jpg"
+                },
+                {
+                    original: "吏捕得之。問曰：「人皆在焉，子攫人之金何？」",
+                    translation: "官吏抓到了他，問道：「大家都在這裡（眾目睽睽），你為什麼要搶別人的金子呢？」",
+                    audioText: "吏捕得之。問曰：人皆在焉，子攫人之金何？",
+                    notes: {
+                        "吏": { zhuyin: "ㄌㄧˋ", type: "名詞", def: "官吏。" },
+                        "捕": { zhuyin: "ㄅㄨˇ", type: "動詞", def: "逮捕。" },
+                        "焉": { zhuyin: "ㄧㄢ", type: "代詞", def: "那裡（指現場）。" },
+                        "子": { zhuyin: "ㄗˇ", type: "代詞", def: "你。" }
+                    },
+                    imageData: "images/reading_segment_2.jpg"
+                },
+                {
+                    original: "對曰：「取金之時，不見人，徒見金。」",
+                    translation: "他回答說：「拿金子的時候，我沒看見人，只看見金子。」",
+                    audioText: "對曰：取金之時，不見人，徒見金。",
+                    notes: {
+                        "徒": { zhuyin: "ㄊㄨˊ", type: "副詞", def: "只、僅僅。" }
+                    },
+                    imageData: "images/reading_segment_3.jpg"
+                }
+            ],
+            quiz: [
+                { q: "這個故事發生在哪個國家？", opts: ["A. 楚國", "B. 齊國", "C. 秦國", "D. 魯國"], ans: "B", exp: "原文開頭即說「齊人」。" },
+                { q: "「清旦」的意思是？", opts: ["A. 清潔的雞蛋", "B. 清楚的單據", "C. 清晨、大清早", "D. 傍晚"], ans: "C", exp: "旦指早晨。" },
+                { q: "「衣冠而之市」的「之」字意思是？", opts: ["A. 代詞，它", "B. 助詞，的", "C. 動詞，往、去", "D. 形容詞，美麗的"], ans: "C", exp: "「之市」即「前往市集」。" },
+                { q: "「適鬻金者之所」的「適」字意思是？", opts: ["A. 適合", "B. 舒適", "C. 往、到", "D. 剛剛"], ans: "C", exp: "適，往也。" },
+                { q: "「鬻」的意思是？", opts: ["A. 買", "B. 賣", "C. 偷", "D. 看"], ans: "B", exp: "鬻音ㄩˋ，賣。" },
+                { q: "齊人搶了金子之後做了什麼？", opts: ["A. 大笑", "B. 哭泣", "C. 逃走（去）", "D. 分給窮人"], ans: "C", exp: "原文「攫其金而去」，去即離開。" },
+                { q: "最後是誰抓住了齊人？", opts: ["A. 賣金者", "B. 路人", "C. 吏（官差）", "D. 他的朋友"], ans: "C", exp: "原文「吏捕得之」。" },
+                { q: "官吏問齊人什麼問題？", opts: ["A. 金子重不重？", "B. 你住在哪裡？", "C. 人都在這，為何敢搶？", "D. 你餓了嗎？"], ans: "C", exp: "原文「人皆在焉，子攫人之金何？」。" },
+                { q: "齊人回答他在搶金子時看見了什麼？", opts: ["A. 很多人", "B. 官吏", "C. 徒見金（只見金子）", "D. 鬼"], ans: "C", exp: "原文「不見人，徒見金」。" },
+                { q: "「徒見金」的「徒」字意思是？", opts: ["A. 徒弟", "B. 走路", "C. 白白地", "D. 只、僅僅"], ans: "D", exp: "徒，但、僅。" },
+                { q: "這則故事用來形容什麼樣的人？", opts: ["A. 勇敢的人", "B. 視力不好的人", "C. 利令智昏的人", "D. 勤勞的人"], ans: "C", exp: "形容被利益蒙蔽理智的人。" },
+                { q: "「衣冠」在文中作動詞用，意思是？", opts: ["A. 買衣服", "B. 穿戴整齊", "C. 洗衣服", "D. 賣帽子"], ans: "B", exp: "穿上衣戴上帽，指穿戴整齊。" },
+                { q: "「因」攫其金的「因」意思是？", opts: ["A. 因為", "B. 原因", "C. 於是、就", "D. 依靠"], ans: "C", exp: "承接連詞，於是。" },
+                { q: "下列哪個成語與本故事主旨最接近？", opts: ["A. 見義勇為", "B. 見錢眼開", "C. 見異思遷", "D. 見微知著"], ans: "B", exp: "見錢眼開，形容貪婪。" },
+                { q: "齊人選擇在什麼時間去搶金子？", opts: ["A. 深夜", "B. 中午", "C. 清旦（白天）", "D. 黃昏"], ans: "C", exp: "清旦，大白天。" },
+                { q: "「攫」的讀音是？", opts: ["A. ㄏㄨㄛˋ", "B. ㄐㄩㄝˊ", "C. ㄓㄨㄚ", "D. ㄑㄩˇ"], ans: "B", exp: "攫，音ㄐㄩㄝˊ。" },
+                { q: "這個故事出自哪部典籍？", opts: ["A. 莊子", "B. 孟子", "C. 列子", "D. 韓非子"], ans: "C", exp: "出自《列子·說符》。" },
+                { q: "齊人為什麼「不見人」？", opts: ["A. 他瞎了", "B. 人隱形了", "C. 被慾望蒙蔽了雙眼", "D. 天太黑"], ans: "C", exp: "心理因素導致的視而不見。" },
+                { q: "「人皆在焉」的「焉」是指？", opts: ["A. 語助詞", "B. 於此（在那裡）", "C. 怎麼", "D. 樣子"], ans: "B", exp: "指在市集現場。" },
+                { q: "齊人「衣冠而之市」的行為顯示他？", opts: ["A. 瘋瘋癲癲", "B. 像個正常人一樣準備出門", "C. 想要去面試", "D. 準備去當官"], ans: "B", exp: "諷刺他外表正常（甚至鄭重），行為卻瘋狂。" }
+            ]
+        };
+
+        // 預處理所有關鍵字
+        const allKeywords = {};
+        contentData.segments.forEach((seg, idx) => {
+            Object.entries(seg.notes).forEach(([key, note]) => {
+                if (!allKeywords[key]) {
+                    allKeywords[key] = { ...note, segIdx: idx };
+                }
+            });
+        });
+
+        // ----------------------------------------------------
+        // 2. 全域狀態管理
+        // ----------------------------------------------------
+        let currentTab = 'overview';
+        let chatHistory = [];
+        let isGeneratingImage = false;
+        let currentAudio = null;
+        let currentPersona = 'bookboy'; 
+        let hasPreloadedStory = false;
+        let userAnswers = {}; 
+
+        const personas = {
+            bookboy: {
+                name: "AI 書僮",
+                icon: "fas fa-user-graduate",
+                color: "blue",
+                intro: "少爺/小姐好！這篇《齊人攫金》雖然短，但寓意深刻。一個人怎麼會笨到在大白天搶劫呢？讓我們一起來看看！",
+                systemPrompt: "你是一位幽默、博學的古代書僮，正在指導國中生閱讀《齊人攫金》。請用輕鬆、鼓勵的語氣回答。"
+            },
+            qi_man: {
+                name: "齊人",
+                icon: "fas fa-user-secret",
+                color: "amber",
+                intro: "金子...閃閃發光的金子...你們不懂，當看到那麼多金子時，世界都消失了，哪裡還有人？",
+                systemPrompt: "你現在扮演《齊人攫金》中的主角。你對金子有異常的執著，說話時只在乎金子，對被抓感到困惑。請用第一人稱「我」回答。"
+            },
+            officer: {
+                name: "官吏",
+                icon: "fas fa-user-shield",
+                color: "red",
+                intro: "大膽狂徒！光天化日之下竟敢搶劫？本官抓了這麼多賊，沒見過你這麼蠢的！",
+                systemPrompt: "你現在扮演抓捕齊人的官吏。你正義凜然，對齊人的愚蠢行為感到不可思議和好笑。請用第一人稱「本官」回答。"
+            },
+            seller: {
+                name: "賣金者",
+                icon: "fas fa-coins",
+                color: "yellow",
+                intro: "嚇死我了！那個人穿得人模人樣的，突然衝過來抓了我的金子就跑！還好官爺在場。",
+                systemPrompt: "你現在扮演被搶的賣金者。你感到驚魂未定。請用第一人稱「小的」回答。"
+            }
+        };
+
+        window.onload = function() {
+            document.getElementById('main-title').textContent = contentData.metadata.title;
+            document.getElementById('author-name').textContent = contentData.metadata.author;
+            document.getElementById('source-name').textContent = contentData.metadata.source;
+            switchTab('overview');
+
+            if ('speechSynthesis' in window) {
+                 window.speechSynthesis.onvoiceschanged = function() {
+                    window.speechSynthesis.getVoices();
+                };
+            }
+
+            document.addEventListener('click', (e) => {
+                const popup = document.getElementById('note-template');
+                if (!e.target.closest('.interactive-word') && !e.target.closest('.note-popup')) {
+                    closeNote();
+                }
+            });
+        };
+
+        function closeNote() {
+            const popup = document.getElementById('note-template');
+            if(popup) {
+                popup.classList.add('hidden');
+                popup.style.display = ''; 
+            }
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            closeNote();
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            const container = document.getElementById('content-display');
+            container.style.opacity = '0';
+            
+            setTimeout(() => {
+                switch(tabId) {
+                    case 'overview': renderOverview(container); break;
+                    case 'reading': renderReading(container); break;
+                    case 'deep': renderDeepUnderstanding(container); break;
+                    case 'vocabulary': renderVocabulary(container); break;
+                    case 'analysis': renderAnalysis(container); break;
+                    case 'chat': renderChat(container); break;
+                    case 'quiz': renderQuiz(container); break;
+                    case 'story': 
+                        renderStory(container); 
+                        break;
+                }
+                container.style.opacity = '1';
+            }, 200);
+        }
+
+        function renderOverview(container) {
+            container.innerHTML = `
+                <div class="max-w-3xl mx-auto">
+                    <div class="bg-amber-50 rounded-xl p-6 border-l-8 border-amber-600 mb-8">
+                        <h2 class="text-2xl font-bold text-amber-900 mb-4"><i class="fas fa-scroll mr-2"></i>故事大意</h2>
+                        <p class="text-lg text-gray-700 leading-loose text-justify">${contentData.summary}</p>
+                    </div>
+                    
+                    <div class="flex justify-center">
+                         <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-center items-center text-center max-w-md w-full">
+                            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-eye-slash text-amber-600 text-2xl"></i>
+                            </div>
+                            <h3 class="font-bold text-gray-800 mb-2">學習重點</h3>
+                            <p class="text-gray-600 text-sm">理解「利令智昏」的道理，警惕貪欲對理智的蒙蔽。</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReading(container) {
+            let segmentsHtml = contentData.segments.map((seg, idx) => {
+                let displayHtml = seg.original;
+                Object.keys(seg.notes).forEach(key => {
+                    displayHtml = displayHtml.replace(key, `<span class="interactive-word" onclick="showNote('${key}', ${idx}, this, event)">${key}</span>`);
+                });
+
+                // GitHub path
+                let imageSection = seg.imageData 
+                    ? `<div class="mt-6 rounded-lg overflow-hidden shadow-lg animate-fade-in"><img src="${seg.imageData}" class="w-full h-auto rounded-lg shadow-md" alt="段落插圖"></div>`
+                    : ``;
+
+                return `
+                    <div class="group mb-12 relative pl-6 border-l-4 border-gray-200 hover:border-amber-500 transition-colors duration-300">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">段落 ${idx + 1}</span>
+                            <button onclick="playAudio('${seg.audioText}')" class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center hover:bg-amber-200 transition" title="朗讀">
+                                <i class="fas fa-volume-up text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="relative hover-trans-container cursor-help py-2">
+                            <p class="text-2xl sm:text-3xl font-serif text-gray-800 leading-relaxed relative z-10">${displayHtml}</p>
+                            <div class="hover-translation hidden absolute left-0 top-full mt-2 w-full z-20">
+                                <div class="bg-white/95 backdrop-blur-sm p-4 rounded-lg text-gray-700 text-lg leading-7 border border-amber-200 shadow-xl relative">
+                                    <div class="absolute -top-2 left-8 w-4 h-4 bg-white border-t border-l border-amber-200 transform rotate-45"></div>
+                                    <span class="font-bold text-amber-700 mr-1"><i class="fas fa-language mr-1"></i>語譯：</span> ${seg.translation}
+                                </div>
+                            </div>
+                        </div>
+                        ${imageSection}
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-6 mb-8 items-center bg-amber-50 p-4 rounded-xl border border-amber-100">
+                    <div class="flex-grow">
+                        <h3 class="font-bold text-amber-900 text-lg">AI 意境圖解</h3>
+                        <p class="text-sm text-amber-700">觀看齊人被貪欲蒙蔽的過程。</p>
+                    </div>
+                </div>
+                <div class="max-w-3xl mx-auto">
+                    ${segmentsHtml}
+                </div>
+                <div class="text-center mt-12 pb-6 text-gray-400 text-sm space-y-1">
+                    <p><i class="fas fa-mouse-pointer mr-1"></i> 點擊底線文字查看註釋</p>
+                    <p><i class="fas fa-hand-pointer mr-1"></i> 滑鼠移過古文即可查看翻譯</p>
+                </div>
+            `;
+        }
+        
+        function renderDeepUnderstanding(container) {
+             container.innerHTML = `
+                <div class="space-y-12">
+                    <section>
+                        <h2 class="text-2xl font-bold text-amber-900 mb-4"><i class="fas fa-brain mr-2"></i>心理盲點示意圖</h2>
+                        <div class="bg-white rounded-xl shadow-lg p-8 border-4 border-amber-200 flex justify-center items-center overflow-hidden" style="min-height: 300px;">
+                             <svg viewBox="0 0 600 300" class="w-full h-full">
+                                <defs>
+                                    <marker id="arrow-logic" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                        <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+                                    </marker>
+                                </defs>
+                                
+                                <!-- Eye/Perception -->
+                                <circle cx="100" cy="150" r="40" fill="#dbeafe" stroke="#2563eb" stroke-width="2" />
+                                <text x="100" y="155" text-anchor="middle" font-weight="bold">齊人之眼</text>
+
+                                <!-- Blockage (Gold) -->
+                                <rect x="250" y="100" width="100" height="100" fill="#fef3c7" stroke="#d97706" stroke-width="3" />
+                                <text x="300" y="155" text-anchor="middle" font-weight="bold" font-size="20" fill="#b45309">慾望 (金)</text>
+
+                                <!-- Reality (People) -->
+                                <g transform="translate(500, 150)" opacity="0.3">
+                                    <circle r="30" fill="#e5e7eb" stroke="#374151" />
+                                    <text y="5" text-anchor="middle">眾人/法治</text>
+                                </g>
+
+                                <!-- Vision Line -->
+                                <line x1="140" y1="150" x2="250" y2="150" stroke="#dc2626" stroke-width="4" marker-end="url(#arrow-logic)" />
+                                <text x="195" y="140" text-anchor="middle" font-size="12" fill="#dc2626">專注</text>
+
+                                <!-- Blocked Line -->
+                                <line x1="350" y1="150" x2="460" y2="150" stroke="#999" stroke-width="2" stroke-dasharray="5,5" />
+                                <text x="405" y="140" text-anchor="middle" font-size="12" fill="#999">被遮蔽</text>
+                            </svg>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2 text-center">徒見金 = 利令智昏，無視現實風險。</p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-2xl font-bold text-amber-900 mb-4"><i class="fas fa-project-diagram mr-2"></i>事件流程圖</h2>
+                        <div class="bg-white rounded-xl shadow-lg p-6 border border-amber-100 flex justify-center overflow-x-auto">
+                            <svg width="600" height="200">
+                                <rect x="50" y="80" width="80" height="40" rx="5" fill="#f3f4f6" stroke="#4b5563" />
+                                <text x="90" y="105" text-anchor="middle" font-size="12">動機:欲金</text>
+                                
+                                <path d="M130,100 L170,100" stroke="#666" marker-end="url(#arrow-logic)" />
+
+                                <rect x="170" y="80" width="80" height="40" rx="5" fill="#dbeafe" stroke="#2563eb" />
+                                <text x="210" y="105" text-anchor="middle" font-size="12">行為:攫金</text>
+
+                                <path d="M250,100 L290,100" stroke="#666" marker-end="url(#arrow-logic)" />
+
+                                <rect x="290" y="80" width="80" height="40" rx="5" fill="#fee2e2" stroke="#dc2626" />
+                                <text x="330" y="105" text-anchor="middle" font-size="12">後果:被捕</text>
+
+                                <path d="M370,100 L410,100" stroke="#666" marker-end="url(#arrow-logic)" />
+
+                                <rect x="410" y="80" width="100" height="40" rx="5" fill="#fef3c7" stroke="#d97706" />
+                                <text x="460" y="105" text-anchor="middle" font-size="12">供詞:不見人</text>
+                            </svg>
+                        </div>
+                    </section>
+                </div>
+            `;
+        }
+
+        function renderVocabulary(container) {
+            const cardsHtml = contentData.vocabulary.map(item => `
+                <div class="bg-white border border-amber-100 rounded-xl p-5 shadow-sm hover:shadow-md transition duration-200 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-2xl font-bold text-amber-900">${item.word}</h3>
+                    </div>
+                    <div class="text-sm text-gray-500 mb-2 font-mono bg-amber-50 inline-block px-2 py-1 rounded self-start">
+                        ${item.zhuyin} • <span class="text-amber-700 font-semibold">${item.pos}</span>
+                    </div>
+                    <p class="text-gray-700 text-lg leading-relaxed flex-grow">${item.meaning}</p>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-center mb-8 text-amber-900 font-serif">語詞精解</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${cardsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAnalysis(container) {
+            const rhetoricHtml = contentData.rhetoric.map(r => `
+                <div class="flex items-start mb-4 p-4 bg-white rounded-lg border border-gray-100 shadow-sm">
+                    <div class="flex-shrink-0 mr-4">
+                        <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 font-bold">
+                            <i class="fas fa-pen-fancy"></i>
+                        </div>
+                    </div>
+                    <div>
+                        ${marked.parse(r)}
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="max-w-3xl mx-auto space-y-10">
+                    <section>
+                        <h2 class="text-2xl font-bold text-amber-900 mb-4 flex items-center">
+                            <i class="fas fa-book-reader mr-3"></i>全文主旨與寓意
+                        </h2>
+                        <div class="bg-amber-50 p-6 rounded-xl border-l-8 border-amber-600 shadow-sm text-lg text-gray-800 leading-loose">
+                            ${contentData.meaning}
+                        </div>
+                    </section>
+                    <section>
+                        <h2 class="text-2xl font-bold text-amber-900 mb-4 flex items-center">
+                            <i class="fas fa-highlighter mr-3"></i>修辭與寫作技巧
+                        </h2>
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            ${rhetoricHtml}
+                        </div>
+                    </section>
+                </div>
+            `;
+        }
+
+        function renderChat(container) {
+            const p = personas[currentPersona];
+            const themeColor = p.color; 
+            
+            const bgClass = `bg-${themeColor}-50`;
+            const borderClass = `border-${themeColor}-100`;
+            const iconBgClass = `bg-${themeColor}-200`;
+            const iconTextClass = `text-${themeColor}-600`;
+            const titleClass = `text-${themeColor}-900`;
+            const subClass = `text-${themeColor}-600`;
+            const focusBorderClass = `focus:border-${themeColor}-500`;
+            const focusRingClass = `focus:ring-${themeColor}-200`;
+            const btnBgClass = `bg-${themeColor}-600`;
+            const btnHoverClass = `hover:bg-${themeColor}-700`;
+
+            container.innerHTML = `
+                <div class="flex flex-col h-[600px]">
+                    <div class="${bgClass} p-4 rounded-t-xl border-b ${borderClass} flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full ${iconBgClass} flex items-center justify-center mr-3 border-2 border-white shadow-sm">
+                                <i class="${p.icon} ${iconTextClass}"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold ${titleClass}">${p.name}</h3>
+                                <p class="text-xs ${subClass}">角色扮演中 (本地版無對話功能)</p>
+                            </div>
+                        </div>
+                        <select onchange="switchPersona(this.value)" class="text-sm border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 p-2">
+                            <option value="bookboy" ${currentPersona === 'bookboy' ? 'selected' : ''}>AI 書僮</option>
+                            <option value="qi_man" ${currentPersona === 'qi_man' ? 'selected' : ''}>齊人</option>
+                            <option value="officer" ${currentPersona === 'officer' ? 'selected' : ''}>官吏</option>
+                            <option value="seller" ${currentPersona === 'seller' ? 'selected' : ''}>賣金者</option>
+                        </select>
+                    </div>
+                    
+                    <div id="chat-messages" class="flex-grow overflow-y-auto p-4 bg-gray-50 space-y-4 custom-scrollbar">
+                        <div class="chat-bubble chat-ai shadow-sm">
+                            ${p.intro} <br><br>(註：GitHub 靜態網頁版不支援 AI 即時對話功能。)
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function switchPersona(newPersona) {
+            currentPersona = newPersona;
+            chatHistory = []; 
+            renderChat(document.getElementById('content-display'));
+        }
+
+        function renderQuiz(container) {
+            let quizHtml = contentData.quiz.map((q, i) => {
+                const val = ["A","B","C","D"];
+                const isAnswered = userAnswers[i] !== undefined;
+                const userAnswer = userAnswers[i];
+                let feedback = '';
+                let cardClass = "bg-white border border-gray-200";
+                let feedbackClass = "hidden mt-4 p-3 rounded-lg text-lg bg-gray-50"; 
+                
+                if (isAnswered) {
+                    feedbackClass = "mt-4 p-3 rounded-lg text-lg animate-fade-in"; 
+                    if (userAnswer === q.ans) {
+                        feedback = `<strong class="block mb-1"><i class="fas fa-check-circle mr-1"></i>答對了！</strong>${q.exp}`;
+                        cardClass = "bg-white border border-green-500 shadow-sm";
+                        feedbackClass += " bg-green-50 text-green-800";
+                    } else {
+                        const userOption = q.opts.find((opt, idx) => ["A","B","C","D"][idx] === userAnswer);
+                        const correctOption = q.opts.find((opt, idx) => ["A","B","C","D"][idx] === q.ans);
+                        feedback = `
+                            <div class="mb-2">
+                                <span class="block font-bold text-red-600"><i class="fas fa-times-circle mr-1"></i>答錯了</span>
+                                <span class="block text-gray-600">您的答案：${userOption || userAnswer}</span>
+                                <span class="block text-green-600 font-bold">正確答案：${correctOption}</span>
+                            </div>
+                            <div class="pt-2 border-t border-gray-200">
+                                <strong>解析：</strong>${q.exp}
+                            </div>
+                        `;
+                        cardClass = "bg-white border border-red-500 shadow-sm";
+                        feedbackClass += " bg-red-50 text-gray-800";
+                    }
+                }
+
+                return `
+                <div class="${cardClass} rounded-xl p-6 mb-6 shadow-sm transition-all duration-300" id="quiz-card-${i}">
+                    <p class="font-bold text-2xl text-gray-800 mb-4"><span class="text-amber-600 mr-2">Q${i+1}.</span>${q.q}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${q.opts.map((opt, optIdx) => {
+                            const val = ["A","B","C","D"][optIdx];
+                            const isChecked = userAnswer === val ? 'checked' : '';
+                            const isDisabled = isAnswered ? 'disabled' : '';
+                            const labelClass = isAnswered ? 'disabled-label' : 'hover:bg-amber-50 cursor-pointer';
+
+                            return `
+                            <label class="flex items-center p-3 rounded-lg border border-gray-100 transition group ${labelClass}">
+                                <input type="radio" name="q-${i}" value="${val}" class="mr-3 text-amber-600 focus:ring-amber-500" onchange="checkAnswer(${i}, '${val}', '${q.ans}')" ${isChecked} ${isDisabled}>
+                                <span class="text-xl group-hover:text-amber-800">${opt}</span>
+                            </label>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div id="feedback-${i}" class="${feedbackClass}">${feedback}</div>
+                </div>
+            `}).join('');
+            
+            container.innerHTML = `
+                <div class="max-w-3xl mx-auto pb-24">
+                    <h2 class="text-2xl font-bold text-center mb-8 text-gray-700">小試身手 (共20題)</h2>
+                    ${quizHtml}
+                    
+                    <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 shadow-lg flex justify-center items-center z-40">
+                         <button onclick="submitQuiz()" class="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-full shadow-lg transition transform hover:scale-105 flex items-center text-lg">
+                            <i class="fas fa-paper-plane mr-2"></i> 交卷並查看成績
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // [Tab Story] 抉擇之路 (RPG)
+        const storyNodes = {
+            start: {
+                id: 'start',
+                text: "你是齊國的一個普通人。今天早上起床，你看著鏡子裡的自己，突然覺得自己應該要很有錢。你想要金子。",
+                imageData: "images/rpg_start.jpg",
+                choices: [
+                    { text: "穿戴整齊去市集看看", next: "market" },
+                    { text: "在家做白日夢", next: "dream" }
+                ]
+            },
+            dream: {
+                id: 'dream',
+                text: "你躺回床上繼續做夢。夢裡你有了金子，但醒來還是一場空。肚子餓了，還是得面對現實。",
+                imageData: "images/rpg_dream.jpg",
+                choices: [{ text: "重來", next: "start" }],
+                isEnding: true
+            },
+            market: {
+                id: 'market',
+                text: "你「衣冠而之市」，穿得整整齊齊來到熱鬧的市集。人群熙熙攘攘，你看到了一個賣金子的攤位。",
+                imageData: "images/rpg_market.jpg",
+                choices: [
+                    { text: "走過去看看", next: "stall" },
+                    { text: "太貴了，還是回家吧", next: "go_home" }
+                ]
+            },
+            go_home: {
+                id: 'go_home',
+                text: "你克制住了慾望，決定回家腳踏實地工作。雖然沒有金子，但你擁有平安。",
+                choices: [{ text: "重來", next: "start" }],
+                isEnding: true,
+                win: true
+            },
+            stall: {
+                id: 'stall',
+                text: "你站在金子攤位前，看著那閃閃發光的金子，心跳加速。你的眼裡似乎只剩下金子了...",
+                imageData: "images/rpg_stall.jpg",
+                choices: [
+                    { text: "不管了，伸手就抓！(攫其金)", next: "grab" },
+                    { text: "冷靜下來，看看周圍", next: "calm_down" }
+                ]
+            },
+            calm_down: {
+                id: 'calm_down',
+                text: "你深吸一口氣，發現周圍都是人，還有官差在巡邏。你意識到搶劫是愚蠢的，於是轉身離開。",
+                imageData: "images/rpg_calm_down.jpg",
+                choices: [{ text: "重新體驗", next: "start" }],
+                isEnding: true,
+                win: true
+            },
+            grab: {
+                id: 'grab',
+                text: "你「因攫其金而去」，抓了金子轉身就跑！但沒跑幾步，就被一群人圍住，官差立刻把你抓了起來。",
+                imageData: "images/rpg_grab.jpg",
+                choices: [
+                    { text: "束手就擒", next: "captured" }
+                ]
+            },
+            captured: {
+                id: 'captured',
+                text: "官差問你：「人皆在焉，子攫人之金何？」（大家都看著，你為什麼敢搶？）你該怎麼回答？",
+                imageData: "images/rpg_captured.jpg",
+                choices: [
+                    { text: "我只看見金子，沒看見人 (徒見金)", next: "bad_end" },
+                    { text: "我...我一時糊塗", next: "regret" }
+                ]
+            },
+            regret: {
+                id: 'regret',
+                text: "【Normal Ending: 悔不當初】你痛哭流涕，承認錯誤。雖然免不了刑罰，但至少你找回了理智。",
+                imageData: "images/rpg_regret.jpg",
+                choices: [{ text: "重來", next: "start" }],
+                isEnding: true
+            },
+            bad_end: {
+                id: 'bad_end',
+                text: "【True Ending: 利令智昏】你說出了千古名言：「取金之時，不見人，徒見金。」你的故事被列子記錄下來，成為後世嘲笑的對象。",
+                imageData: "images/rpg_bad_end.jpg",
+                choices: [{ text: "重新體驗", next: "start" }],
+                isEnding: true
+            }
+        };
+
+        function renderStory(container) {
+            if(!window.currentStoryNode) window.currentStoryNode = 'start';
+            const node = storyNodes[window.currentStoryNode];
+
+            let imageContent = `<div class="w-full overflow-hidden rounded-t-xl"><img src="${node.imageData}" class="w-full h-auto fade-in-image" alt="場景圖" onerror="this.style.display='none'"></div>`;
+            
+            container.innerHTML = `<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-amber-100">${imageContent}<div class="p-8"><div class="flex items-center mb-4 text-amber-800 text-sm font-bold uppercase tracking-widest"><i class="fas fa-scroll mr-2"></i> 抉擇時刻</div><p class="text-xl leading-relaxed text-gray-800 mb-8 font-serif">${node.text}</p>${node.isEnding ? (node.win ? `<div class="text-center mb-6 text-green-600 font-bold text-2xl p-4 bg-green-50 rounded-lg border border-green-200"><i class="fas fa-trophy mr-2"></i>懸崖勒馬！</div>` : `<div class="text-center mb-6 text-red-600 font-bold text-2xl p-4 bg-red-50 rounded-lg border border-red-200"><i class="fas fa-skull-crossbones mr-2"></i>利令智昏</div>`) : ''}<div class="grid gap-4">${node.choices.map(c => `<button onclick="nextStoryNode('${c.next}')" class="story-choice w-full py-4 px-6 bg-white hover:bg-amber-50 border-2 border-amber-200 hover:border-amber-400 rounded-xl text-amber-900 font-bold text-lg transition duration-200 flex items-center justify-between group"><span>${c.text}</span><i class="fas fa-chevron-right text-amber-300 group-hover:text-amber-600 transition"></i></button>`).join('')}</div></div></div>`;
+            if(node.win) { 
+                try {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                } catch(e) {
+                    console.log("Confetti effect skipped");
+                }
+            }
+        }
+
+        function nextStoryNode(nodeId) {
+            window.currentStoryNode = nodeId;
+            renderStory(document.getElementById('content-display'));
+        }
+
+        function checkAnswer(idx, val, ans) {
+            if (userAnswers[idx] !== undefined) return; 
+
+            userAnswers[idx] = val; 
+            
+            const radios = document.getElementsByName(`q-${idx}`);
+            for (let radio of radios) {
+                radio.disabled = true;
+                radio.parentElement.classList.add('disabled-label');
+            }
+
+            const feedbackEl = document.getElementById(`feedback-${idx}`);
+            const card = document.getElementById(`quiz-card-${idx}`);
+            const qData = contentData.quiz[idx];
+            if (!feedbackEl || !card) return;
+            
+            feedbackEl.className = 'mt-4 p-3 rounded-lg text-lg animate-fade-in';
+            card.classList.remove('border-green-500', 'border-red-500');
+
+            if (val === ans) {
+                feedbackEl.innerHTML = `<strong class="block mb-1"><i class="fas fa-check-circle mr-1"></i>答對了！</strong>${qData.exp}`;
+                feedbackEl.classList.add('bg-green-50', 'text-green-800');
+                card.classList.add('border-green-500');
+            } else {
+                feedbackEl.innerHTML = `<strong class="block mb-1"><i class="fas fa-times-circle mr-1"></i>再想一下...</strong>提示：${qData.exp.substring(0, 15)}...`;
+                feedbackEl.classList.add('bg-red-50', 'text-red-800');
+                card.classList.add('border-red-500');
+            }
+            // Ensure visible
+            feedbackEl.classList.remove('hidden');
+        }
+
+        function submitQuiz() {
+            const total = contentData.quiz.length;
+            const answered = Object.keys(userAnswers).length;
+            
+            if (answered < total) {
+                showError(`您還有 ${total - answered} 題未完成，請作答完畢後再交卷！`);
+                return;
+            }
+            
+            let correctCount = 0;
+            for (let i = 0; i < total; i++) {
+                if (userAnswers[i] === contentData.quiz[i].ans) {
+                    correctCount++;
+                }
+            }
+            
+            const score = Math.round((correctCount / total) * 100);
+
+            const scoreText = document.getElementById('score-text');
+            scoreText.innerHTML = `您的總分是 <span class="text-amber-600 font-bold text-4xl">${score}</span> 分`;
+            
+            const modal = document.getElementById('score-modal');
+            modal.classList.remove('hidden');
+            
+            try {
+                confetti({
+                    particleCount: 200,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            } catch(e) {}
+        }
+
+        function closeScoreModal() {
+            const modal = document.getElementById('score-modal');
+            modal.classList.add('hidden');
+        }
+        
+        function showNote(key, segIdx, el, e) {
+            if (e && e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            const popup = document.getElementById('note-template');
+            const content = document.getElementById('note-content');
+            
+            let noteData = null;
+            
+            if (segIdx !== undefined && contentData.segments[segIdx] && contentData.segments[segIdx].notes[key]) {
+                noteData = contentData.segments[segIdx].notes[key];
+            } else if (allKeywords[key]) {
+                noteData = allKeywords[key];
+            }
+
+            if(!noteData) return;
+
+            content.innerHTML = `
+                <div class="flex items-baseline justify-between border-b border-gray-100 pb-2 mb-2">
+                    <h4 class="text-xl font-bold text-amber-800">${key}</h4>
+                    <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded">${noteData.type || noteData.pos}</span>
+                </div>
+                <p class="text-sm text-gray-500 mb-1 font-mono">${noteData.zhuyin}</p>
+                <p class="text-gray-700 leading-relaxed">${noteData.def || noteData.meaning}</p>
+            `;
+
+            const rect = el.getBoundingClientRect();
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            let left = rect.left + scrollLeft;
+            let top = rect.bottom + scrollTop + 5; 
+
+            if (left + 260 > document.body.clientWidth) { 
+                left = document.body.clientWidth - 270;
+            }
+
+            popup.style.left = `${left}px`;
+            popup.style.top = `${top}px`;
+            
+            popup.classList.remove('hidden');
+        }
+
+        function playAudio(text) {
+            if (!('speechSynthesis' in window)) { showError("您的瀏覽器不支援語音朗讀功能。"); return; }
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-TW'; 
+            utterance.rate = 0.85; 
+            utterance.pitch = 1.0;
+            const voices = window.speechSynthesis.getVoices();
+            let targetVoice = voices.find(v => (v.lang === 'zh-TW' || v.lang === 'cmn-Hant-TW') && (v.name.includes('Google') || v.name.includes('Hanhan') || v.name.includes('Mei-Jia') || v.name.includes('Yating')));
+            if (!targetVoice) { targetVoice = voices.find(v => v.lang === 'zh-TW' || v.lang === 'cmn-Hant-TW'); }
+            if (!targetVoice) { targetVoice = voices.find(v => v.lang.startsWith('zh')); }
+            if (targetVoice) { utterance.voice = targetVoice; }
+            utterance.onerror = (e) => { console.error("Speech synthesis error:", e); showError("語音播放發生錯誤，可能是瀏覽器限制或網路問題。"); };
+            window.speechSynthesis.speak(utterance);
+        }
+        window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
+
+        function showError(msg) {
+            const toast = document.getElementById('error-toast');
+            document.getElementById('error-msg').innerText = msg;
+            toast.classList.remove('hidden');
+            requestAnimationFrame(() => { toast.classList.remove('translate-y-10', 'opacity-0'); });
+            setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.classList.add('hidden'), 300); }, 4000);
+        }
+
+    </script>
+</body>
+</html>
